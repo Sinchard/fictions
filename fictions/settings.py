@@ -91,6 +91,7 @@ COOKIES_ENABLED = False
 
 SITE_RANGE=100
 
+SITE_DOMAIN='500shuba.com'
 SITE_URL="http://m.500shuba.com/top/allvisit_{0}/"
 FICTION_URL="http://m.500shuba.com/html/{0}/"
 CHAPTER_URL="http://m.500shuba.com/html/{0}/{1}.html"
@@ -98,3 +99,5 @@ CHAPTER_URL="http://m.500shuba.com/html/{0}/{1}.html"
 FICTION_PRIORITY=10
 CHAPTER_PRIORITY=20
 CONTENT_PRIORITY=30
+
+FICTION_XPATH_IN_LIST="//p[@class='line']"
