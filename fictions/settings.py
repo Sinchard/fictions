@@ -27,7 +27,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 2
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -52,9 +52,10 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'fictions.middlewares.FictionsDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
+    'myfiction.middlewares.RandomUserAgentMiddleware': 400
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -64,9 +65,9 @@ COOKIES_ENABLED = False
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'fictions.pipelines.FictionsPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'myfiction.pipelines.MyfictionPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -101,3 +102,7 @@ CHAPTER_PRIORITY=20
 CONTENT_PRIORITY=30
 
 FICTION_XPATH_IN_LIST="//p[@class='line']"
+CHAPTER_XPATH_IN_FICTION="//ul[@class='chapter']/li"
+NEXT_PAGE_XPATH_IN_CHAPTER="//div[@class='page']/a/@href"
+CONTENT_XPATH_IN_CHAPTER="//div[@id='nr1']"
+NEXT_PAGE_XPATH_IN_CONTENT="//td[@class='next']/@href"
