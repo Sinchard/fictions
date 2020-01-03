@@ -93,7 +93,9 @@ SITE_RANGE = 100
 
 SITE_DOMAIN = '500shuba.com'
 SITE_URL = "http://m.500shuba.com/top/allvisit_{0}/"
+LIST_URL_PATTEN=r"http://m.500shuba.com/top/allvisit_\d+/"
 FICTION_URL = "http://m.500shuba.com/html/{0}/"
+FICTION_URL_PATTEN = "http://m.500shuba.com/html/\d+/"
 CHAPTER_URL = "http://m.500shuba.com/html/{0}/{1}.html"
 
 FICTION_PRIORITY = 10
