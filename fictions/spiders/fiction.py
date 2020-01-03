@@ -32,21 +32,18 @@ class FictionSpider(scrapy.Spider):
 
         next = response.xpath(NEXT_PAGE_XPATH_IN_CONTENT).get()
         if next is not None:
-            contenturl = response.urljoin(url)
-            yield scrapy.Request(contenturl, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
+            yield response.follow(next, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
 
     def parseChapterUrl(self, response):
         for c in response.xpath(NEXT_PAGE_XPATH_IN_CHAPTER):
             # get chapter content
             url = c.xpath("a/@href").get()
             if url is not None:
-                contenturl = response.urljoin(url)
-                yield scrapy.Request(contenturl, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
+                yield response.follow(url, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
         # get next page url
         next_page = response.xpath(NEXT_PAGE_XPATH_IN_CHAPTER)[0].get()
         if next_page is not None:
-            next_page = response.urljoin(next_page)
-            yield scrapy.Request(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
+            yield response.follow(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
 
     # According to the settings param, get fiction url and parse the chapters' urls
     def parse(self, response):
