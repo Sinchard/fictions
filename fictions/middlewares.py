@@ -101,8 +101,8 @@ class FictionsDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
-        
-        
+
+
 class RandomUserAgentMiddleware(UserAgentMiddleware):
 
     def __init__(self, user_agent=''):
@@ -153,4 +153,4 @@ class RandomUserAgentMiddleware(UserAgentMiddleware):
         "(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
         "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 ",
         "(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-    ]        
+    ]

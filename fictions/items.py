@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import sqlite3
-from peewee import *
 import scrapy
-
-from myfiction.settings import FICTION_URL, CHAPTER_URL
+from peewee import *
 
 db = SqliteDatabase('fictions.db')
 
@@ -18,7 +15,7 @@ class FictionURLItem(scrapy.Item):
 
 class Fictions(Model):
     id = PrimaryKeyField()
-    fictionid= CharField(verbose_name="fictionid", max_length=100, null=False)
+    fictionid = CharField(verbose_name="fictionid", max_length=100, null=False)
     chapterid = CharField(verbose_name="chapterid", max_length=100, null=False)
     name = CharField(verbose_name="name", max_length=200, null=False)
     content = TextField(verbose_name="content")

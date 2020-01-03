@@ -1,9 +1,9 @@
 import pathlib
-import pytest
-from scrapy.http import HtmlResponse, Request
 
 import betamax
+import pytest
 from betamax.fixtures.pytest import _betamax_recorder
+from scrapy.http import HtmlResponse
 
 # betamax配置，设置betamax录像带的存储位置
 cassette_dir = pathlib.Path(__file__).parent / 'fixture' / 'cassettes'
