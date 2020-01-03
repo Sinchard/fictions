@@ -14,7 +14,7 @@ class FictionURLItem(scrapy.Item):
 
 
 class Fictions(Model):
-    id = PrimaryKeyField()
+    id = AutoField()
     fictionid = CharField(verbose_name="fictionid", max_length=100, null=False)
     chapterid = CharField(verbose_name="chapterid", max_length=100, null=False)
     name = CharField(verbose_name="name", max_length=200, null=False)
