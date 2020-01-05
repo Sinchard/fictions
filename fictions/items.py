@@ -39,11 +39,13 @@ class Chapters(BaseModel):
 
 # get the fiction name and url
 class ContentItem(MyItem):
+    fiction_id = scrapy.Field()
     chapter_id = scrapy.Field()
     content = scrapy.Field()
 
 
 class Contents(BaseModel):
+    fiction_id = CharField(verbose_name="fiction_id", max_length=200, null=False)
     chapter_id = CharField(verbose_name="chapter_id", max_length=100, null=False)
     content = TextField(verbose_name="content")
 
