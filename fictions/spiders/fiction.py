@@ -15,27 +15,19 @@ class FictionSpider(scrapy.Spider):
         for i in range(SITE_RANGE):
             yield scrapy.Request(url=SITE_URL.format(i + 1), callback=self.parse)
 
-    def getChapterItem(self, response):
-        chapter = ChapterItem()
-        url = response.url
-        chapter["fiction_id"] = url.split("/")[-2]
-        chapter['chapter_id'] = url.split("/")[-1].split(".")[-2]
-        title = response.xpath("//title/text()").get().strip()
-        chapter["name"] = title.split("_")[1]
-        return chapter
-
     def getContentItem(self, response):
         content = ContentItem()
         url = response.url
+        content["fiction_id"] = url.split("/")[-2]
         content['chapter_id'] = url.split("/")[-1].split(".")[-2]
-        content['name'] = response.xpath("//title/text()")[0].get().split("_")[1]
+        title = response.xpath("//title/text()").get().strip()
+        content["name"] = title.split("_")[1]
         # item['content'] = item.content.decode("gbk")
         # item['content'] = item.content.encode("utf8")
         content['content'] = response.xpath("//div[@id='nr1']").get().strip()
         return content
 
     def parseContentURL(self, response):
-        yield self.getChapterItem()
         content = self.getContentItem()
         if content['content'] is not None and content['content'] != "":
             yield content
