@@ -29,34 +29,37 @@ def match_list_range(url):
         return False
 
 
-def test_fiction_spider_start_requests():
-    spider = FictionSpider()
-    for request in spider.start_requests():
-        url = request.url
-        # print(url)
-        assert match_url(url, LIST_URL_PATTEN)
-        assert match_list_range(url)
-
-
-def test_fiction_spider_parse(resource_get):
-    spider = FictionSpider()
-    request = next(spider.start_requests())
+class Test_Fiction_Spider():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
     }
-    session = Session()
-    with Betamax(session) as vcr:
-        vcr.use_cassette('parse')
-        resp = session.get(request.url, headers=headers)
-        selector = HtmlResponse(body=resp.content, url=request.url, request=request)
-        for request in spider.parse(selector):
-            assert match_url(request.url, FICTION_URL_PATTEN)
-            assert request.priority == FICTION_PRIORITY
 
+    def setup_method(self):
+        self.spider = FictionSpider()
+        self.session = Session()
 
-def test_fiction_spider_parse_chapter_url(resource_get):
-    pass
+    def teardown_method(self):
+        print('teardown_class()')
 
+    def test_fiction_spider_start_requests(self):
+        for request in self.spider.start_requests():
+            url = request.url
+            # print(url)
+            assert match_url(url, LIST_URL_PATTEN)
+            assert match_list_range(url)
 
-def test_fiction_spider_parse_content(resource_get):
-    pass
+    def test_fiction_spider_parse(self):
+        request = next(self.spider.start_requests())
+        with Betamax(self.session) as vcr:
+            vcr.use_cassette('parse')
+            resp = self.session.get(request.url, headers=self.headers)
+            selector = HtmlResponse(body=resp.content, url=request.url, request=request)
+            for request in self.spider.parse(selector):
+                assert match_url(request.url, FICTION_URL_PATTEN)
+                assert request.priority == FICTION_PRIORITY
+
+    def test_fiction_spider_parse_chapter_url(self):
+        pass
+
+    def test_fiction_spider_parse_content(self):
+        pass
