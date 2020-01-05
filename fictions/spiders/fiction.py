@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-from fictions.items import FictionURLItem
+from fictions.items import FictionItem, ChapterItem, ContentItem
 from fictions.settings import CONTENT_XPATH_IN_CHAPTER, NEXT_PAGE_XPATH_IN_CONTENT, NEXT_PAGE_XPATH_IN_CHAPTER, \
     FICTION_XPATH_IN_LIST
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
@@ -17,37 +17,60 @@ class FictionSpider(scrapy.Spider):
         for i in range(SITE_RANGE):
             yield scrapy.Request(url=SITE_URL.format(i + 1), callback=self.parse)
 
-    def parseContentURL(self, response):
-        item = FictionURLItem()
-        item['content'] = response.xpath(CONTENT_XPATH_IN_CHAPTER).get().strip()
+    def getChapterItem(self, response):
+        chapter = ChapterItem()
+        url = response.url
+        chapter["fiction_id"] = url.split("/")[-2]
+        chapter['chapter_id'] = url.split("/")[-1].split(".")[-2]
+        title = response.xpath("//title/text()").get().strip()
+        chapter["name"] = title.split("_")[1]
+        return chapter
+
+    def getContentItem(self, response):
+        content = ContentItem()
+        url = response.url
+        content['chapter_id'] = url.split("/")[-1].split(".")[-2]
+        content['name'] = response.xpath("//title/text()")[0].get().split("_")[1]
         # item['content'] = item.content.decode("gbk")
         # item['content'] = item.content.encode("utf8")
-        if item['content'] != None and item['content'] != "":
-            item['name'] = response.xpath("//title/text()")[0].get().split("_")[0]
-            # url = http://m.500shuba.com/html/32199/8964193.html
-            url = response.url
-            item['id'] = url.split("/")[-2]
-            item['chapterid'] = url.split("/")[-1].split(".")[-2]
-            yield item
+        content['content'] = response.xpath("//div[@id='nr1']").get().strip()
+        return content
 
-        next = response.xpath(NEXT_PAGE_XPATH_IN_CONTENT).get()
-        if next is not None:
-            yield response.follow(next, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
+    def parseContentURL(self, response):
+        yield self.getChapterItem()
+        content = self.getContentItem()
+        if content['content'] is not None and content['content'] != "":
+            yield content
+
+        next_page = response.xpath("//td[@class='next']/@href").get()
+        if next_page is not None:
+            yield response.follow(next_page, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
+
+    def getFictionItem(self, response):
+        fiction = FictionItem()
+        url = response.url
+        fiction["fiction_id"] = url.split("/")[-2]
+        title = response.xpath("//title/text()").get().strip()
+        fiction["name"] = title.split(",")[0].split("最新")[0]
+        fiction["url"] = url
+        return fiction
 
     def parseChapterUrl(self, response):
-        for c in response.xpath(NEXT_PAGE_XPATH_IN_CHAPTER):
+        yield self.getFictionItem(response)
+
+        for c in response.xpath("//ul[@class='chapter']/li"):
             # get chapter content
             url = c.xpath("a/@href").get()
             if url is not None:
                 yield response.follow(url, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
         # get next page url
-        next_page = response.xpath(NEXT_PAGE_XPATH_IN_CHAPTER)[0].get()
+        next_page = response.xpath("//div[@class='page']/a/@href")[0].get()
         if next_page is not None:
             yield response.follow(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
 
     # According to the settings param, get fiction url and parse the chapters' urls
     def parse(self, response):
-        for f in response.xpath(FICTION_XPATH_IN_LIST):
+        for f in response.xpath("//p[@class='line']"):
             url = f.xpath("a/@href").get()
             url = FICTION_URL.format(url.split("/")[-2])
             if url is not None and url.strip() != "":
