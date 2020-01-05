@@ -2,8 +2,6 @@
 import scrapy
 
 from fictions.items import FictionItem, ChapterItem, ContentItem
-from fictions.settings import CONTENT_XPATH_IN_CHAPTER, NEXT_PAGE_XPATH_IN_CONTENT, NEXT_PAGE_XPATH_IN_CHAPTER, \
-    FICTION_XPATH_IN_LIST
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
 from fictions.settings import SITE_RANGE, FICTION_URL, SITE_URL, SITE_DOMAIN
 
