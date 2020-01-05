@@ -59,7 +59,18 @@ class Test_Fiction_Spider():
                 assert request.priority == FICTION_PRIORITY
 
     def test_fiction_spider_parse_chapter_url(self):
-        pass
+        request = next(self.spider.start_requests())
+        with Betamax(self.session) as vcr:
+            vcr.use_cassette('parse_chapter')
+            resp = self.session.get(request.url, headers=self.headers)
+            selector = HtmlResponse(body=resp.content, url=request.url, request=request)
+            chapter_request = next(self.spider.parse(selector))
+            chapter_resp = self.session.get(chapter_request.url, headers=self.headers)
+            chapter_selector = HtmlResponse(body=chapter_resp.content, url=request.url, request=chapter_request)
+            for request in self.spider.parseChapterUrl(chapter_selector):
+                assert match_url(request.url, FICTION_URL_PATTEN)
+                assert request.priority == FICTION_PRIORITY
+
 
     def test_fiction_spider_parse_content(self):
         pass
