@@ -25,6 +25,7 @@ class FictionSpider(scrapy.Spider):
         content['chapter_id'] = url.split("/")[-1].split(".")[-2]
         title = response.xpath("//title/text()").get().strip()
         content["name"] = title.split("_")[1]
+        content["url"] = url
         # item['content'] = item.content.decode("gbk")
         # item['content'] = item.content.encode("utf8")
         content['content'] = response.xpath("//div[@id='nr1']").get().strip()
