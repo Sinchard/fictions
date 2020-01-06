@@ -53,7 +53,7 @@ COOKIES_ENABLED = False
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'myfiction.middlewares.RandomUserAgentMiddleware': 400
+    'fictions.middlewares.RandomUserAgentMiddleware': 400
 }
 
 # Enable or disable extensions
@@ -65,7 +65,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'myfiction.pipelines.MyfictionPipeline': 300,
+    'fictions.pipelines.MyfictionPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
