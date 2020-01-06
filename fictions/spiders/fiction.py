@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy.http import HtmlResponse
 
 from fictions.items import FictionItem, ChapterItem, ContentItem
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
@@ -16,6 +17,8 @@ class FictionSpider(scrapy.Spider):
             yield scrapy.Request(url=SITE_URL.format(i + 1), callback=self.parse)
 
     def getContentItem(self, response):
+        if response is None or not isinstance(response, HtmlResponse):
+            return
         content = ContentItem()
         url = response.url
         content["fiction_id"] = url.split("/")[-2]
@@ -28,7 +31,7 @@ class FictionSpider(scrapy.Spider):
         return content
 
     def parseContentURL(self, response):
-        content = self.getContentItem()
+        content = self.getContentItem(response)
         if content['content'] is not None and content['content'] != "":
             yield content
 
