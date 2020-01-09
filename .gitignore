@@ -7,3 +7,5 @@ tests/.pytest_cache/
 tests/.pytest_cache
 job_info/
 *.db
+/fictions/fictions.db-journal
+/logs.txt
