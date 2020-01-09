@@ -36,4 +36,6 @@ class MyfictionPipeline(object):
         elif isinstance(item, ContentItem):
             save_content(item)
 
+        return item
+
 
