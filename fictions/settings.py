@@ -21,15 +21,15 @@ NEWSPIDER_MODULE = 'fictions.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 2
+# DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
-# CONCURRENT_REQUESTS_PER_IP = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -65,8 +65,12 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'fictions.pipelines.MyfictionPipeline': 300,
+    'fictions.pipelines.MySQLStorePipeline': 300,
 }
+
+DEPTH_PRIORITY = 1
+SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
+SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -90,21 +94,22 @@ ITEM_PIPELINES = {
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 404, 408]
 
-SITE_RANGE = 100
+MYSQL_HOST = 'localhost'
+MYSQL_DB = 'fictions'
+MYSQL_USER = 'root'
+MYSQL_PASSWD = '123456'
+MYSQL_CHARSET = 'utf8'
+MYSQL_PORT = 3306
+
+SITE_RANGE = 1000
 
 SITE_DOMAIN = '500shuba.com'
 SITE_URL = "http://m.500shuba.com/top/allvisit_{0}/"
-LIST_URL_PATTEN=r"http://m.500shuba.com/top/allvisit_\d+/"
+LIST_URL_PATTEN = r"http://m.500shuba.com/top/allvisit_\d+/"
 FICTION_URL = "http://m.500shuba.com/html/{0}/"
 FICTION_URL_PATTEN = "http://m.500shuba.com/html/\d+/"
 CHAPTER_URL = "http://m.500shuba.com/html/{0}/{1}.html"
 
 FICTION_PRIORITY = 10
-CHAPTER_PRIORITY = 20
-CONTENT_PRIORITY = 30
-
-FICTION_XPATH_IN_LIST = "//p[@class='line']"
-CHAPTER_XPATH_IN_FICTION = "//ul[@class='chapter']/li"
-NEXT_PAGE_XPATH_IN_CHAPTER = "//div[@class='page']/a/@href"
-CONTENT_XPATH_IN_CHAPTER = "//div[@id='nr1']"
-NEXT_PAGE_XPATH_IN_CONTENT = "//td[@class='next']/@href"
+CHAPTER_PRIORITY = 10
+CONTENT_PRIORITY = 10
