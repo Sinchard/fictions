@@ -2,7 +2,7 @@
 import scrapy
 from scrapy.http import HtmlResponse
 
-from fictions.items import FictionItem, ChapterItem, ContentItem
+from fictions.items import FictionItem, ContentItem
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
 from fictions.settings import SITE_RANGE, FICTION_URL, SITE_URL, SITE_DOMAIN
 
@@ -32,11 +32,12 @@ class FictionSpider(scrapy.Spider):
         return content
 
     def parseContentURL(self, response):
+        self.log("Response Encoding: %s" % response.encoding)
         content = self.getContentItem(response)
         if content['content'] is not None and content['content'] != "":
             yield content
 
-        next_page = response.xpath("//td[@class='next']/@href").get()
+        next_page = response.xpath("//td[@class='next']/a/@href").get()
         if next_page is not None:
             yield response.follow(next_page, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
 
@@ -58,9 +59,11 @@ class FictionSpider(scrapy.Spider):
             if url is not None:
                 yield response.follow(url, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
         # get next page url
-        next_page = response.xpath("//div[@class='page']/a/@href")[0].get()
-        if next_page is not None:
-            yield response.follow(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
+        pages = response.xpath("//div[@class='page']/a/@href")
+        for page in pages:
+            next_page = page.get()
+            if next_page is not None:
+                yield response.follow(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
 
     # According to the settings param, get fiction url and parse the chapters' urls
     def parse(self, response):
