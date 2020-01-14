@@ -21,6 +21,7 @@ class BaseModel(Model):
 
 class FictionItem(MyItem):
     fiction_id = scrapy.Field()
+    ifiction_id = scrapy.Field()
 
 
 class Fictions(BaseModel):
@@ -31,6 +32,8 @@ class Fictions(BaseModel):
 class ContentItem(MyItem):
     fiction_id = scrapy.Field()
     chapter_id = scrapy.Field()
+    ifiction_id = scrapy.Field()
+    dchapter_id = scrapy.Field()
     content = scrapy.Field()
 
 
