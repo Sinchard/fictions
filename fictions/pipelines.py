@@ -47,8 +47,8 @@ class MyfictionPipeline(object):
         return item
 
 
-BUCK_FICTION_LENGTH = 1000
-BUCK_CONTENT_LENGTH = 50
+BUCK_FICTION_LENGTH = 2000
+BUCK_CONTENT_LENGTH = 100
 
 pool = PooledDB(creator=pymysql, maxcached=5, maxshared=5, host='localhost', user='root', passwd='123456',
                 db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
@@ -69,11 +69,11 @@ class MySQLStorePipeline(object):
         self.cursor = self.conn.cursor()
         try:
             print("inserting fictions in batch--->>>>>", len(fictions))
-            sql = """INSERT INTO fictions(name, fiction_id, url) VALUES (%s, %s, %s)"""
+            sql = """INSERT INTO fictions(name, fiction_id, ifiction_id, url) VALUES (%s, %s, %s, %s)"""
             self.cursor.executemany(sql, fictions)
             self.conn.commit()
-        except:
-            print("inserting fictions failed!")
+        except Exception as e:
+            print("执行MySQL: % s时出错： % s" % (sql, e))
             self.conn.rollback()
 
     def bulk_insert_contents(self, contents):
@@ -81,25 +81,26 @@ class MySQLStorePipeline(object):
         self.cursor = self.conn.cursor()
         try:
             print("inserting contents in batch--->>>>>", len(contents))
-            sql = """INSERT INTO contents(name, fiction_id, chapter_id, url, content) VALUES (%s, %s, %s, %s, %s)"""
+            sql = """INSERT INTO contents(name, fiction_id, ifiction_id, chapter_id, dchapter_id, url, content) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
             self.cursor.executemany(sql, contents)
             self.conn.commit()
-        except:
-            print("inserting contents failed!")
+        except Exception as e:
+            print("执行MySQL: % s时出错： % s" % (sql, e))
             self.conn.rollback()
 
     def process_item(self, item, spider):
         if isinstance(item, FictionItem):
-            self.fiction_list.append((item['name'], item['fiction_id'], item['url']))
+            self.fiction_list.append((item['name'], item['fiction_id'], item['ifiction_id'], item['url']))
             if len(self.fiction_list) >= BUCK_FICTION_LENGTH:
                 self.bulk_insert_fictions(self.fiction_list)
                 del self.fiction_list[:]
         elif isinstance(item, ContentItem):
             self.content_list.append(
-                (item['name'], item['fiction_id'], item['chapter_id'], item['url'], item['content']))
+                (item['name'], item['fiction_id'], item['ifiction_id'], item['chapter_id'], item['dchapter_id'], item['url'], item['content']))
             if len(self.content_list) >= BUCK_CONTENT_LENGTH:
                 self.bulk_insert_contents(self.content_list)
                 del self.content_list[:]
+            item['content'] = None
 
         return item
 
