@@ -7,5 +7,6 @@ tests/.pytest_cache/
 tests/.pytest_cache
 job_info/
 *.db
+*.sqlite3
 /fictions/fictions.db-journal
 /logs.txt
