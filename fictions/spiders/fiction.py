@@ -5,7 +5,6 @@ from scrapy.http import HtmlResponse
 from fictions.items import FictionItem, ContentItem
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
 from fictions.settings import SITE_RANGE, FICTION_URL, SITE_URL, SITE_DOMAIN
-from fictions.pipelines import pool
 
 
 class FictionSpider(scrapy.Spider):
@@ -13,10 +12,6 @@ class FictionSpider(scrapy.Spider):
     allowed_domains = [SITE_DOMAIN]
     conn = None
     cursor = None
-
-    def __init__(self):
-        self.conn = pool.connection()
-        self.cursor = self.conn.cursor()
 
     # According to the settings param, yield the top list fictions' urls
     def start_requests(self):
@@ -50,14 +45,6 @@ class FictionSpider(scrapy.Spider):
         if next_page is not None:
             yield response.follow(next_page, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
 
-    def is_content_saved(self, fiction_id, chapter_id):
-        #sql = """SELECT * from contents where ifiction_id=%d and dchapter_id=%f"""
-        sql = """SELECT * from contents where ifiction_id={0:d} and dchapter_id={1:f}"""
-        sql = sql.format(fiction_id, chapter_id)
-        self.cursor.execute(sql)
-        rows = self.cursor.fetchall()
-        return rows is not None and len(rows) > 0
-
     def parseChapterUrl(self, response):
         print("Parsing Chapter Url:" + response.url)
         for c in response.xpath("//ul[@class='chapter']/li"):
@@ -77,29 +64,27 @@ class FictionSpider(scrapy.Spider):
             if next_page is not None:
                 yield response.follow(next_page, callback=self.parseChapterUrl, priority=CHAPTER_PRIORITY)
 
-    def is_fiction_saved(self, fiction_id):
-        sql = """SELECT * from fictions where ifiction_id={0:d}"""
-        sql = sql.format(fiction_id)
-        self.cursor.execute(sql)
-        rows = self.cursor.fetchall()
-        return rows is not None and len(rows) > 0
+    def getFictionItem(self, f):
+        fiction = FictionItem()
+        url = f.xpath("a/@href").get()
+        fiction_id = url.split("/")[-2]
+        fiction["fiction_id"] = fiction_id
+        fiction["ifiction_id"] = int(fiction["fiction_id"])
+        fiction["name"] = f.xpath("a/text()").get()
+        url = FICTION_URL.format(fiction_id)
+        fiction["url"] = url
+        return fiction
 
     # According to the settings param, get fiction url and parse the chapters' urls
     def parse(self, response):
         for f in response.xpath("//p[@class='line']"):
-            url = f.xpath("a/@href").get()
-            fiction_id = url.split("/")[-2]
+            item = self.getFictionItem(f)
             # Don't save the saved fiction
-            if self.is_fiction_saved(int(fiction_id)):
+            if item.is_saved():
                 continue
             else:
-                fiction = FictionItem()
-                fiction["fiction_id"] = fiction_id
-                fiction["ifiction_id"] = int(fiction["fiction_id"])
-                fiction["name"] = f.xpath("a/text()").get()
-                url = FICTION_URL.format(fiction_id)
-                fiction["url"] = url
-                yield fiction
+                yield item
             # Get the chapter information whether the fiction is saved
+            url = item.url
             if url is not None and url.strip() != "":
                 yield scrapy.Request(url, callback=self.parseChapterUrl, priority=FICTION_PRIORITY)
