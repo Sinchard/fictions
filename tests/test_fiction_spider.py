@@ -7,7 +7,7 @@ from scrapy.http import HtmlResponse
 from fictions.settings import FICTION_PRIORITY
 from fictions.settings import SITE_RANGE, LIST_URL_PATTEN, FICTION_URL_PATTEN
 from fictions.spiders.fiction import FictionSpider
-
+from fictions.items import FictionItem, ContentItem
 
 # url=http://m.500shuba.com/top/allvisit_1/
 def match_url(url, patten):
@@ -48,6 +48,7 @@ class Test_Fiction_Spider():
             assert match_url(url, LIST_URL_PATTEN)
             assert match_list_range(url)
 
+
     def test_fiction_spider_parse(self):
         request = next(self.spider.start_requests())
         with Betamax(self.session) as vcr:
@@ -55,8 +56,11 @@ class Test_Fiction_Spider():
             resp = self.session.get(request.url, headers=self.headers)
             selector = HtmlResponse(body=resp.content, url=request.url, request=request)
             for request in self.spider.parse(selector):
-                assert match_url(request.url, FICTION_URL_PATTEN)
-                assert request.priority == FICTION_PRIORITY
+                if isinstance(request, FictionItem):
+                    assert request.check()
+                else:
+                    assert match_url(request.url, FICTION_URL_PATTEN)
+                    assert request.priority == FICTION_PRIORITY
 
     def test_fiction_spider_parse_chapter_url(self):
         request = next(self.spider.start_requests())
@@ -68,8 +72,11 @@ class Test_Fiction_Spider():
             chapter_resp = self.session.get(chapter_request.url, headers=self.headers)
             chapter_selector = HtmlResponse(body=chapter_resp.content, url=request.url, request=chapter_request)
             for request in self.spider.parseChapterUrl(chapter_selector):
-                assert match_url(request.url, FICTION_URL_PATTEN)
-                assert request.priority == FICTION_PRIORITY
+                if isinstance(request, ContentItem):
+                    assert request.check()
+                else:
+                    assert match_url(request.url, FICTION_URL_PATTEN)
+                    assert request.priority == FICTION_PRIORITY
 
 
     def test_fiction_spider_parse_content(self):
