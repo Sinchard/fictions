@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 import pymysql
 from DBUtils.PooledDB import PooledDB
-# 数据库pymysql的commit()和execute()在提交数据时，都是同步提交至数据库，由于scrapy框架数据的解析是异步多线程的，所以scrapy的数据解析速度，要远高于数据的写入数据库的速度。如果数据写入过慢，会造成数据库写入的阻塞，影响数据库写入的效率。
-# 通过多线程异步的形式对数据进行写入，可以提高数据的写入速度。
-from pymysql import cursors
-# 使用twsited异步IO框架，实现数据的异步写入。
-from twisted.enterprise import adbapi
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-from fictions.items import Fictions, Contents
 from fictions.items import FictionItem, ContentItem
 
-
+'''
+from fictions.items import Fictions, Contents
 def save_fiction(item):
     if not Fictions.table_exists():
         Fictions.create_table()
@@ -45,12 +40,12 @@ class MyfictionPipeline(object):
             save_content(item)
 
         return item
-
+'''
 
 BUCK_FICTION_LENGTH = 2000
 BUCK_CONTENT_LENGTH = 100
 
-pool = PooledDB(creator=pymysql, maxcached=5, maxshared=5, host='localhost', user='root', passwd='123456',
+pool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root', passwd='123456',
                 db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
 
 
@@ -113,6 +108,12 @@ class MySQLStorePipeline(object):
         self.cursor.close()
         self.conn.close()
 
+'''
+# 数据库pymysql的commit()和execute()在提交数据时，都是同步提交至数据库，由于scrapy框架数据的解析是异步多线程的，所以scrapy的数据解析速度，要远高于数据的写入数据库的速度。如果数据写入过慢，会造成数据库写入的阻塞，影响数据库写入的效率。
+# 通过多线程异步的形式对数据进行写入，可以提高数据的写入速度。
+from pymysql import cursors
+# 使用twsited异步IO框架，实现数据的异步写入。
+from twisted.enterprise import adbapi
 
 class MySQLTwistedPipeline(object):
     """
@@ -171,3 +172,4 @@ class MySQLTwistedPipeline(object):
     def insert_content(self, cursor, item):
         insert_sql = "INSERT INTO contents(name, fiction_id, chapter_id, url, content) VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(insert_sql, (item['name'], item['fiction_id'], item['chapter_id'], item['url'], item['content']))
+'''
