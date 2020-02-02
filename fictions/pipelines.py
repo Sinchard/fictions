@@ -6,6 +6,7 @@ from DBUtils.PooledDB import PooledDB
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from fictions.items import FictionItem, ContentItem
+from .models import FictionModel, ChapterModel, ContentModel
 
 '''
 from fictions.items import Fictions, Contents
@@ -45,22 +46,26 @@ class MyfictionPipeline(object):
 BUCK_FICTION_LENGTH = 2000
 BUCK_CONTENT_LENGTH = 100
 
-pool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root', passwd='123456',
-                db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
+mypool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root', passwd='123456',
+                  db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
 
 
-class MySQLStorePipeline(object):
+class SQLStorePipeline(object):
     fiction_list = []
     content_list = []
+    pool = None
     conn = None
     cursor = None
 
+    def __init__(self,pool):
+        self.pool=pool
+
     def open_spider(self, spider):
-        pass
+        pool=mypool
 
     # 批量插入
     def bulk_insert_fictions(self, fictions):
-        self.conn = pool.connection()
+        self.conn = self.pool.connection()
         self.cursor = self.conn.cursor()
         try:
             print("inserting fictions in batch--->>>>>", len(fictions))
@@ -72,7 +77,7 @@ class MySQLStorePipeline(object):
             self.conn.rollback()
 
     def bulk_insert_contents(self, contents):
-        self.conn = pool.connection()
+        self.conn = self.mypool.connection()
         self.cursor = self.conn.cursor()
         try:
             print("inserting contents in batch--->>>>>", len(contents))
@@ -108,6 +113,48 @@ class MySQLStorePipeline(object):
         self.cursor.close()
         self.conn.close()
 
+
+class ModelStorePipeline(object):
+    fiction_list = []
+    chapter_list = []
+    content_list = []
+
+    # 批量插入
+    def bulk_insert_fictions(self, fictions):
+        FictionModel.insert_many(fictions).execute()
+
+
+    def bulk_insert_chapters(self, chapters):
+        ChapterModel.insert_many(chapters).execute()
+
+
+    def bulk_insert_contents(self, contents):
+        ContentModel.insert_many(contents).execute()
+
+    def process_item(self, item, spider):
+        if isinstance(item, FictionItem):
+            self.fiction_list.append(dict(item))
+            if len(self.fiction_list) >= BUCK_FICTION_LENGTH:
+                self.bulk_insert_fictions(self.fiction_list)
+                del self.fiction_list[:]
+        elif isinstance(item, ContentItem):
+            self.content_list.append(
+                (item['name'], item['fiction_id'], item['ifiction_id'], item['chapter_id'], item['dchapter_id'], item['url'], item['content']))
+            if len(self.content_list) >= BUCK_CONTENT_LENGTH:
+                self.bulk_insert_contents(self.content_list)
+                del self.content_list[:]
+            item['content'] = None
+
+        return item
+
+    # spider结束
+    def close_spider(self, spider):
+        print("closing spider,last commit")
+        self.bulk_insert_fictions(self.fiction_list)
+        self.bulk_insert_contents(self.content_list)
+        self.conn.commit()
+        self.cursor.close()
+        self.conn.close()
 '''
 # 数据库pymysql的commit()和execute()在提交数据时，都是同步提交至数据库，由于scrapy框架数据的解析是异步多线程的，所以scrapy的数据解析速度，要远高于数据的写入数据库的速度。如果数据写入过慢，会造成数据库写入的阻塞，影响数据库写入的效率。
 # 通过多线程异步的形式对数据进行写入，可以提高数据的写入速度。
