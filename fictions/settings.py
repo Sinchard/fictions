@@ -110,6 +110,6 @@ FICTION_URL = "http://m.500shuba.com/html/{0}/"
 FICTION_URL_PATTEN = "http://m.500shuba.com/html/\d+/"
 CHAPTER_URL = "http://m.500shuba.com/html/{0}/{1}.html"
 
-FICTION_PRIORITY = 10
-CHAPTER_PRIORITY = 10
+FICTION_PRIORITY = 100
+CHAPTER_PRIORITY = 50
 CONTENT_PRIORITY = 10
