@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
-import scrapy
+from datetime import datetime
+
 from scrapy.http import HtmlResponse
 
-from fictions.items import FictionItem, ContentItem
+from fictions.items import *
+from fictions.models import *
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
 from fictions.settings import SITE_RANGE, FICTION_URL, SITE_URL, SITE_DOMAIN
+
+
+def is_saved(model, *args):
+    count = 0
+    if len(args) > 1:
+        count = model.select().where(model.fiction_id == args[0]).where(model.chapter_id == args[1]).count()
+    elif len(args) == 1:
+        count = model.select().where(model.fiction_id == args[0]).count()
+    return count > 0
 
 
 class FictionSpider(scrapy.Spider):
@@ -40,7 +51,7 @@ class FictionSpider(scrapy.Spider):
         content = self.getContentItem(response)
         if content['content'] is not None and content['content'] != "":
             yield content
-
+        # get next page url
         next_page = response.xpath("//td[@class='next']/a/@href").get()
         if next_page is not None:
             yield response.follow(next_page, callback=self.parseContentURL, priority=CONTENT_PRIORITY)
@@ -50,9 +61,9 @@ class FictionSpider(scrapy.Spider):
         for c in response.xpath("//ul[@class='chapter']/li"):
             # get chapter content
             url = c.xpath("a/@href").get()
-            fiction_id = url.split("/")[-2]
-            chapter_id = url.split("/")[-1].split(".")[-2]
-            if self.is_content_saved(int(fiction_id), float(chapter_id.replace('_', '.'))):
+            fiction_id = int(url.split("/")[-2])
+            chapter_id = float(url.split("/")[-1].split(".")[-2])
+            if is_saved(ChapterModel, [fiction_id, chapter_id]):
                 continue
             else:
                 if url is not None:
@@ -68,11 +79,12 @@ class FictionSpider(scrapy.Spider):
         fiction = FictionItem()
         url = f.xpath("a/@href").get()
         fiction_id = url.split("/")[-2]
-        fiction["fiction_id"] = fiction_id
-        fiction["ifiction_id"] = int(fiction["fiction_id"])
+        fiction["fiction_id"] = int(fiction_id)
         fiction["name"] = f.xpath("a/text()").get()
         url = FICTION_URL.format(fiction_id)
         fiction["url"] = url
+        fiction['save'] = 1
+        fiction['updated'] = datetime.now()
         return fiction
 
     # According to the settings param, get fiction url and parse the chapters' urls
@@ -80,7 +92,7 @@ class FictionSpider(scrapy.Spider):
         for f in response.xpath("//p[@class='line']"):
             item = self.getFictionItem(f)
             # Don't save the saved fiction
-            if item.is_saved():
+            if is_saved(FictionModel, item['fiction_id']):
                 continue
             else:
                 yield item
