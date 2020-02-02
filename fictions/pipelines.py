@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pymysql
 from DBUtils.PooledDB import PooledDB
+
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -8,9 +9,8 @@ from DBUtils.PooledDB import PooledDB
 from .items import FictionItem, ChapterItem, ContentItem
 from .models import FictionModel, ChapterModel, ContentModel
 
-
-BUCK_FICTION_LENGTH = 20
-BUCK_CONTENT_LENGTH = 5
+BUCK_FICTION_LENGTH = 2000
+BUCK_CONTENT_LENGTH = 50
 
 mypool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root', passwd='123456',
                   db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
