@@ -1,13 +1,15 @@
 import re
+import unittest
 
 from betamax import Betamax
 from requests import Session
 from scrapy.http import HtmlResponse
 
+from fictions.items import FictionItem, ContentItem
 from fictions.settings import FICTION_PRIORITY
 from fictions.settings import SITE_RANGE, LIST_URL_PATTEN, FICTION_URL_PATTEN
 from fictions.spiders.fiction import FictionSpider
-from fictions.items import FictionItem, ContentItem
+
 
 # url=http://m.500shuba.com/top/allvisit_1/
 def match_url(url, patten):
@@ -29,7 +31,7 @@ def match_list_range(url):
         return False
 
 
-class Test_Fiction_Spider():
+class Test_Fiction_Spider(unittest.TestCase):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
     }
@@ -47,7 +49,6 @@ class Test_Fiction_Spider():
             # print(url)
             assert match_url(url, LIST_URL_PATTEN)
             assert match_list_range(url)
-
 
     def test_fiction_spider_parse(self):
         request = next(self.spider.start_requests())
@@ -77,7 +78,6 @@ class Test_Fiction_Spider():
                 else:
                     assert match_url(request.url, FICTION_URL_PATTEN)
                     assert request.priority == FICTION_PRIORITY
-
 
     def test_fiction_spider_parse_content(self):
         pass

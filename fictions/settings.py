@@ -65,7 +65,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'fictions.pipelines.MySQLStorePipeline': 300,
+    'fictions.pipelines.SQLStorePipeline': 300,
 }
 
 DEPTH_PRIORITY = 1
