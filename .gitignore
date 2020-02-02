@@ -10,3 +10,4 @@ job_info/
 *.sqlite3
 /fictions/fictions.db-journal
 /logs.txt
+/.vscode/
