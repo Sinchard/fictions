@@ -101,7 +101,7 @@ MYSQL_PASSWD = '123456'
 MYSQL_CHARSET = 'utf8'
 MYSQL_PORT = 3306
 
-SITE_RANGE = 1
+SITE_RANGE = 100
 
 SITE_DOMAIN = '500shuba.com'
 SITE_URL = "http://m.500shuba.com/top/allvisit_{0}/"
