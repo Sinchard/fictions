@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-
-from scrapy.http import HtmlResponse
 
 from fictions.items import *
 from fictions.models import *
 from fictions.settings import FICTION_PRIORITY, CHAPTER_PRIORITY, CONTENT_PRIORITY
-from fictions.settings import SITE_RANGE, FICTION_URL, SITE_URL, SITE_DOMAIN
+from fictions.settings import SITE_RANGE, SITE_URL, SITE_DOMAIN
 
 
 def is_saved(model, *args):
@@ -52,12 +49,15 @@ class FictionSpider(scrapy.Spider):
             if is_saved(ChapterModel, item["fiction_id"], item["chapter_id"]):
                 self.log("Fiction %d Chapter %d is saved" %
                          (item['fiction_id'], item["chapter_id"]))
-                continue
             else:
                 yield item
+            if is_saved(ContentModel, item["fiction_id"], item["chapter_id"]):
+                self.log("Fiction %d Chapter %d  content is saved" %
+                         (item['fiction_id'], item["chapter_id"]))
+            else:
                 yield response.follow(item["url"],
-                                        callback=self.parseContentURL,
-                                        priority=CONTENT_PRIORITY)
+                                      callback=self.parseContentURL,
+                                      priority=CONTENT_PRIORITY)
         # get next page url
         pages = response.xpath("//div[@class='page']/a/@href")
         for page in pages:
@@ -84,4 +84,3 @@ class FictionSpider(scrapy.Spider):
                 continue
             else:
                 yield item
-            
