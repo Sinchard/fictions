@@ -7,7 +7,7 @@ from DBUtils.PooledDB import PooledDB
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from .items import FictionItem, ChapterItem, ContentItem
-from .models import FictionModel, ChapterModel, ContentModel
+from .models import FictionModel, ChapterModel, ContentModel, database
 
 BUCK_FICTION_LENGTH = 2000
 BUCK_CONTENT_LENGTH = 50
@@ -100,18 +100,21 @@ class ModelStorePipeline(object):
         if isinstance(item, FictionItem):
             self.fiction_list.append(dict(item))
             if len(self.fiction_list) >= BUCK_FICTION_LENGTH:
-                FictionModel.insert_many(self.fiction_list).execute()
-                del self.fiction_list[:]
+                with database.execution_context():
+                    FictionModel.insert_many(self.fiction_list).execute()
+                    del self.fiction_list[:]
         elif isinstance(item, ChapterItem):
             self.chapter_list.append(dict(item))
             if len(self.content_list) >= BUCK_FICTION_LENGTH:
-                ChapterModel.insert_many(self.chapter_list).execute()
-                del self.content_list[:]
+                with database.execution_context():
+                    ChapterModel.insert_many(self.chapter_list).execute()
+                    del self.content_list[:]
         elif isinstance(item, ContentItem):
             self.content_list.append(dict(item))
             if len(self.content_list) >= BUCK_CONTENT_LENGTH:
-                ContentModel.insert_many(self.content_list).execute()
-                del self.content_list[:]
+                with database.execution_context():
+                    ContentModel.insert_many(self.content_list).execute()
+                    del self.content_list[:]
             item['content'] = None
 
         return item
@@ -119,9 +122,10 @@ class ModelStorePipeline(object):
     # spider结束
     def close_spider(self, spider):
         print("closing spider,last commit")
-        FictionModel.insert_many(self.fiction_list).execute()
-        ChapterModel.insert_many(self.chapter_list).execute()
-        ContentModel.insert_many(self.content_list).execute()
+        with database.execution_context():
+            FictionModel.insert_many(self.fiction_list).execute()
+            ChapterModel.insert_many(self.chapter_list).execute()
+            ContentModel.insert_many(self.content_list).execute()
 
 
 '''
