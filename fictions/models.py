@@ -1,8 +1,13 @@
 from peewee import *
 
-database = MySQLDatabase('test',
-                         **{'charset': 'utf8', 'sql_mode': 'PIPES_AS_CONCAT', 'use_unicode': True, 'user': 'root',
-                            'password': '123456'})
+database = MySQLDatabase(
+    'test', **{
+        'charset': 'utf8',
+        'sql_mode': 'PIPES_AS_CONCAT',
+        'use_unicode': True,
+        'user': 'root',
+        'password': '123456'
+    })
 
 
 class BaseModel(Model):

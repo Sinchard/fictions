@@ -33,7 +33,6 @@ def resource_get(betamax_session):
         # 将requests的Response，封装成scrapy的HtmlResponse
         return HtmlResponse(body=resp.content)
     """
-
     def get(url, *args, **kwargs):
         request = kwargs.pop('request', None)
         resp = betamax_session.get(url, *args, **kwargs)

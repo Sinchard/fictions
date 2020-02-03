@@ -12,8 +12,16 @@ from .models import FictionModel, ChapterModel, ContentModel
 BUCK_FICTION_LENGTH = 2000
 BUCK_CONTENT_LENGTH = 50
 
-mypool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root', passwd='123456',
-                  db='fictions', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
+mypool = PooledDB(creator=pymysql,
+                  maxcached=10,
+                  maxshared=10,
+                  host='localhost',
+                  user='root',
+                  passwd='123456',
+                  db='fictions',
+                  port=3306,
+                  charset="utf8",
+                  setsession=['SET AUTOCOMMIT = 1'])
 
 
 class SQLStorePipeline(object):
@@ -23,11 +31,11 @@ class SQLStorePipeline(object):
     conn = None
     cursor = None
 
-    def __init__(self,pool):
-        self.pool=pool
+    def __init__(self, pool):
+        self.pool = pool
 
     def open_spider(self, spider):
-        pool=mypool
+        pool = mypool
 
     # 批量插入
     def bulk_insert_fictions(self, fictions):
@@ -56,13 +64,16 @@ class SQLStorePipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, FictionItem):
-            self.fiction_list.append((item['name'], item['fiction_id'], item['ifiction_id'], item['url']))
+            self.fiction_list.append((item['name'], item['fiction_id'],
+                                      item['ifiction_id'], item['url']))
             if len(self.fiction_list) >= BUCK_FICTION_LENGTH:
                 self.bulk_insert_fictions(self.fiction_list)
                 del self.fiction_list[:]
         elif isinstance(item, ContentItem):
             self.content_list.append(
-                (item['name'], item['fiction_id'], item['ifiction_id'], item['chapter_id'], item['dchapter_id'], item['url'], item['content']))
+                (item['name'], item['fiction_id'], item['ifiction_id'],
+                 item['chapter_id'], item['dchapter_id'], item['url'],
+                 item['content']))
             if len(self.content_list) >= BUCK_CONTENT_LENGTH:
                 self.bulk_insert_contents(self.content_list)
                 del self.content_list[:]
@@ -84,7 +95,6 @@ class ModelStorePipeline(object):
     fiction_list = []
     chapter_list = []
     content_list = []
-
 
     def process_item(self, item, spider):
         if isinstance(item, FictionItem):
@@ -112,6 +122,7 @@ class ModelStorePipeline(object):
         FictionModel.insert_many(self.fiction_list).execute()
         ChapterModel.insert_many(self.chapter_list).execute()
         ContentModel.insert_many(self.content_list).execute()
+
 
 '''
 # 数据库pymysql的commit()和execute()在提交数据时，都是同步提交至数据库，由于scrapy框架数据的解析是异步多线程的，所以scrapy的数据解析速度，要远高于数据的写入数据库的速度。如果数据写入过慢，会造成数据库写入的阻塞，影响数据库写入的效率。

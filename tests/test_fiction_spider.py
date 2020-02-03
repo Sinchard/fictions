@@ -33,7 +33,8 @@ def match_list_range(url):
 
 class Test_Fiction_Spider(unittest.TestCase):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
     }
 
     def setup_method(self):
@@ -55,7 +56,9 @@ class Test_Fiction_Spider(unittest.TestCase):
         with Betamax(self.session) as vcr:
             vcr.use_cassette('parse')
             resp = self.session.get(request.url, headers=self.headers)
-            selector = HtmlResponse(body=resp.content, url=request.url, request=request)
+            selector = HtmlResponse(body=resp.content,
+                                    url=request.url,
+                                    request=request)
             for request in self.spider.parse(selector):
                 if isinstance(request, FictionItem):
                     assert request.check()
@@ -68,10 +71,15 @@ class Test_Fiction_Spider(unittest.TestCase):
         with Betamax(self.session) as vcr:
             vcr.use_cassette('parse_chapter')
             resp = self.session.get(request.url, headers=self.headers)
-            selector = HtmlResponse(body=resp.content, url=request.url, request=request)
+            selector = HtmlResponse(body=resp.content,
+                                    url=request.url,
+                                    request=request)
             chapter_request = next(self.spider.parse(selector))
-            chapter_resp = self.session.get(chapter_request.url, headers=self.headers)
-            chapter_selector = HtmlResponse(body=chapter_resp.content, url=request.url, request=chapter_request)
+            chapter_resp = self.session.get(chapter_request.url,
+                                            headers=self.headers)
+            chapter_selector = HtmlResponse(body=chapter_resp.content,
+                                            url=request.url,
+                                            request=chapter_request)
             for request in self.spider.parseChapterUrl(chapter_selector):
                 if isinstance(request, ContentItem):
                     assert request.check()

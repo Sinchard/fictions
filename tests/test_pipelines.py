@@ -48,7 +48,8 @@ class Test_Model_Store_Pipeline(unittest.TestCase):
         self.original_db = FictionModel._meta.database
         self.sqlite_db = SqliteDatabase('my_app.db')
         self.sqlite_db.bind([FictionModel, ChapterModel, ContentModel])
-        self.sqlite_db.create_tables([FictionModel, ChapterModel, ContentModel])
+        self.sqlite_db.create_tables(
+            [FictionModel, ChapterModel, ContentModel])
         self.pipeline = ModelStorePipeline()
         self.spider = FictionSpider()
 
@@ -65,19 +66,22 @@ class Test_Model_Store_Pipeline(unittest.TestCase):
         self.assertEqual(20, ContentModel.select().count())
 
     def test_process_fiction_item(self):
-        with self.sqlite_db.bind_ctx([FictionModel, ChapterModel, ContentModel]):
+        with self.sqlite_db.bind_ctx(
+            [FictionModel, ChapterModel, ContentModel]):
             for i in range(23):
                 self.pipeline.process_item(create_fiction_item(i), self.spider)
         self.assertEqual(20, FictionModel.select().count())
 
     def test_process_chapter_item(self):
-        with self.sqlite_db.bind_ctx([FictionModel, ChapterModel, ContentModel]):
+        with self.sqlite_db.bind_ctx(
+            [FictionModel, ChapterModel, ContentModel]):
             for i in range(23):
                 self.pipeline.process_item(create_chapter_item(i), self.spider)
         self.assertEqual(20, ChapterModel.select().count())
 
     def test_process_content_item(self):
-        with self.sqlite_db.bind_ctx([FictionModel, ChapterModel, ContentModel]):
+        with self.sqlite_db.bind_ctx(
+            [FictionModel, ChapterModel, ContentModel]):
             for i in range(23):
                 self.pipeline.process_item(create_content_item(i), self.spider)
         self.assertEqual(20, ContentModel.select().count())
@@ -88,9 +92,16 @@ class Test_SQLStorePipeline(unittest.TestCase):
     pool = None
 
     def setUp(self):
-        self.pool = PooledDB(creator=pymysql, maxcached=10, maxshared=10, host='localhost', user='root',
+        self.pool = PooledDB(creator=pymysql,
+                             maxcached=10,
+                             maxshared=10,
+                             host='localhost',
+                             user='root',
                              passwd='123456',
-                             db='test', port=3306, charset="utf8", setsession=['SET AUTOCOMMIT = 1'])
+                             db='test',
+                             port=3306,
+                             charset="utf8",
+                             setsession=['SET AUTOCOMMIT = 1'])
         self.pipe = SQLStorePipeline(self.pool)
 
     def tearDown(self):
