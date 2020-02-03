@@ -28,8 +28,9 @@ class FictionSpider(scrapy.Spider):
     # According to the settings param, yield the top list fictions' urls
     def start_requests(self):
         for i in range(SITE_RANGE):
-            yield scrapy.Request(url=SITE_URL.format(i + 1),
-                                 callback=self.parse)
+            url = SITE_URL.format(i + 1)
+            self.log(url)
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def getContentItem(self, response):
         if response is None or not isinstance(response, HtmlResponse):
@@ -78,7 +79,7 @@ class FictionSpider(scrapy.Spider):
         pages = response.xpath("//div[@class='page']/a/@href")
         for page in pages:
             next_page = page.get()
-            if next_page is not None:
+            if next_page is not None and next_page.strip() != "":
                 yield response.follow(next_page,
                                       callback=self.parseChapterUrl,
                                       priority=CHAPTER_PRIORITY)
@@ -97,16 +98,18 @@ class FictionSpider(scrapy.Spider):
 
     # According to the settings param, get fiction url and parse the chapters' urls
     def parse(self, response):
+        self.log(response.request.url)
         for f in response.xpath("//p[@class='line']"):
             item = self.getFictionItem(f)
             # Don't save the saved fiction
             if is_saved(FictionModel, item['fiction_id']):
+                self.log("Fiction %d is saved" % item['fiction_id'])
                 continue
             else:
                 yield item
             # Get the chapter information whether the fiction is saved
-            url = item.url
-            if url is not None and url.strip() != "":
-                yield scrapy.Request(url,
-                                     callback=self.parseChapterUrl,
-                                     priority=FICTION_PRIORITY)
+            # url = item.url
+            # if url is not None and url.strip() != "":
+            #     yield scrapy.Request(url,
+            #                          callback=self.parseChapterUrl,
+            #                          priority=FICTION_PRIORITY)
