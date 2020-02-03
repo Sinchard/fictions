@@ -1,3 +1,3 @@
 from scrapy import cmdline
 
-cmdline.execute("scrapy crawl fiction -s JOBDIR=job_info".split())
+cmdline.execute("scrapy crawl fiction".split())  # -s JOBDIR=job_info
