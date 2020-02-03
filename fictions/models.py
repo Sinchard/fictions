@@ -1,7 +1,11 @@
 from peewee import *
+from playhouse.pool import PooledMySQLDatabase
 
-database = MySQLDatabase(
-    'test', **{
+database = PooledMySQLDatabase(
+    'test',
+    max_connections=32,
+    stale_timeout=300,
+    **{
         'charset': 'utf8',
         'sql_mode': 'PIPES_AS_CONCAT',
         'use_unicode': True,
