@@ -29,7 +29,7 @@ class FictionItem(MyItem):
         url = fiction_a.xpath("a/@href").get()
         item["fiction_id"] = get_fiction_id(url)
         item["name"] = fiction_a.xpath("a/text()").get()
-        item["url"] = FICTION_URL.format(fiction_id)
+        item["url"] = FICTION_URL.format(item["fiction_id"])
         item["save"] = 1
         item["updated"] = datetime.now()
         return item
