@@ -113,7 +113,7 @@ class RandomUserAgentMiddleware(UserAgentMiddleware):
         ua = random.choice(self.user_agent_list)
         if ua:
             # 显示当前使用的useragent
-            print("********Current UserAgent:%s************" % ua)
+            # print("********Current UserAgent:%s************" % ua)
             request.headers.setdefault('User-Agent', ua)
 
     # UA池，更多UA头部可参考 http://www.useragentstring.com/pages/useragentstring.php
