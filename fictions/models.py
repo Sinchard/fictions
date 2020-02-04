@@ -1,16 +1,23 @@
 from peewee import *
 from playhouse.pool import PooledMySQLDatabase
+from playhouse.db_url import connect
 
-database = PooledMySQLDatabase(
-    'test',
-    max_connections=32,
-    stale_timeout=300,
+# database = PooledMySQLDatabase('test',
+#                                max_connections=32,
+#                                stale_timeout=300,
+#                                **{
+#                                    'charset': 'utf8',
+#                                    'sql_mode': 'PIPES_AS_CONCAT',
+#                                    'use_unicode': True,
+#                                    'user': 'root',
+#                                    'password': '123456'
+#                                })
+database = connect(
+    "mysql+pool://root:123456@localhost:3306/test?max_connections=32&stale_timeout=300",
     **{
         'charset': 'utf8',
         'sql_mode': 'PIPES_AS_CONCAT',
         'use_unicode': True,
-        'user': 'root',
-        'password': '123456'
     })
 
 

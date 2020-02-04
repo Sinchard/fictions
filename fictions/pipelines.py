@@ -94,25 +94,25 @@ class SQLStorePipeline(object):
 class ModelStorePipeline(object):
     fiction_list = []
     chapter_list = []
-    content_list = []
+    content_list = []i
 
     def process_item(self, item, spider):
         if isinstance(item, FictionItem):
             self.fiction_list.append(dict(item))
             if len(self.fiction_list) >= BUCK_FICTION_LENGTH:
-                with database.execution_context():
+                with database.connection_context():
                     FictionModel.insert_many(self.fiction_list).execute()
                     del self.fiction_list[:]
         elif isinstance(item, ChapterItem):
             self.chapter_list.append(dict(item))
             if len(self.content_list) >= BUCK_FICTION_LENGTH:
-                with database.execution_context():
+                with database.connection_context():
                     ChapterModel.insert_many(self.chapter_list).execute()
                     del self.content_list[:]
         elif isinstance(item, ContentItem):
             self.content_list.append(dict(item))
             if len(self.content_list) >= BUCK_CONTENT_LENGTH:
-                with database.execution_context():
+                with database.connection_context():
                     ContentModel.insert_many(self.content_list).execute()
                     del self.content_list[:]
             item['content'] = None
